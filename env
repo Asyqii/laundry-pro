@@ -1,0 +1,24 @@
+# ENVIRONTMENT 
+CI_ENVIRONMENT = production
+
+# DATABASE
+firebase.apiKey = 
+firebase.authDomain = 
+firebase.projectId = 
+firebase.storageBucket = 
+firebase.messagingSenderId = 
+firebase.appId = 
+
+# URL
+app.baseURL = 
+
+# SMTP BREVO
+email.protocol = 
+email.SMTPHost = 
+email.SMTPUser = 
+email.SMTPPass = 
+email.SMTPPort = 
+email.SMTPCrypto = 
+email.mailType = 
+email.charset = 
+email.Brand = 

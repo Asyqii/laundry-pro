@@ -115,22 +115,30 @@
     <div class="md:hidden mb-3">
       <select x-model="selectedTab"
         class="w-full border border-outline rounded p-2 text-sm dark:border-outline-dark dark:bg-surface-dark dark:text-on-surface-dark">
-        <template x-for="tab in tabs" :key="tab.key">
-          <option :value="tab.key" x-text="tab.label"></option>
+        <option value="Semua">Semua</option>
+        <template x-for="tab in dynamicTabs" :key="tab">
+          <option :value="tab" x-text="tab"></option>
         </template>
       </select>
     </div>
     <!-- Desktop Tabs -->
     <div class="hidden md:flex gap-2 overflow-x-auto border-b border-outline dark:border-outline-dark" role="tablist">
-      <template x-for="tab in tabs" :key="tab.key">
+      <button type="button" class="flex items-center gap-2 px-4 py-2 text-sm h-min" role="tab"
+        :aria-selected="selectedTab === 'Semua'" :tabindex="selectedTab === 'Semua' ? '0' : '-1'"
+        :class="selectedTab === 'Semua'
+          ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark'
+          : 'text-on-surface font-medium dark:text-on-surface-dark hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong dark:hover:text-on-surface-dark-strong dark:hover:border-b-outline-dark-strong'"
+        x-on:click="selectedTab = 'Semua'">
+        <span>Semua</span>
+      </button>
+      <template x-for="tab in dynamicTabs" :key="tab">
         <button type="button" class="flex items-center gap-2 px-4 py-2 text-sm h-min" role="tab"
-          :aria-selected="selectedTab === tab.key" :tabindex="selectedTab === tab.key ? '0' : '-1'"
-          :class="selectedTab === tab.key
+          :aria-selected="selectedTab === tab" :tabindex="selectedTab === tab ? '0' : '-1'"
+          :class="selectedTab === tab
             ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark'
             : 'text-on-surface font-medium dark:text-on-surface-dark hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong dark:hover:text-on-surface-dark-strong dark:hover:border-b-outline-dark-strong'"
-          x-on:click="selectedTab = tab.key">
-          <i :class="tab.icon + ' fa-sm'"></i>
-          <span x-text="tab.label"></span>
+          x-on:click="selectedTab = tab">
+          <span x-text="tab"></span>
         </button>
       </template>
     </div>
@@ -272,28 +280,12 @@
 </div>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-9T416znFL7X9DEX9"></script>
-<script src="/js/tes.js"></script>
+<script src="/js/utils/emails.js"></script>
 <script>
 function pesananUser() {
   return {
     selectedTab: 'Semua',
     searchQuery: '',
-    tabs: [{
-        key: 'Semua',
-        label: 'Semua',
-        icon: 'fas fa-list'
-      },
-      {
-        key: 'Sedang Diproses',
-        label: 'Diproses',
-        icon: 'fas fa-sync-alt'
-      },
-      {
-        key: 'Selesai',
-        label: 'Selesai',
-        icon: 'fas fa-check-circle'
-      }
-    ],
     pesanan: [],
     loadingSubmit: false,
     modalOpen: false,
@@ -343,6 +335,11 @@ function pesananUser() {
         key: k,
         label: k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ')
       }));
+    },
+    get dynamicTabs() {
+      // Ambil status unik dari data pesanan
+      const statusSet = new Set(this.pesanan.map(p => p.status).filter(Boolean));
+      return Array.from(statusSet).sort();
     },
     async fetchLayanan() {
       try {
@@ -460,19 +457,19 @@ function pesananUser() {
       };
       firebase.firestore().collection('orders').add(dataPesanan)
         .then((docRef) => {
-          console.log(dataPesanan)
-          fetch('/send-email', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              to: 'jackkolor69@gmail.com',
-              subject: 'Pesanan Baru Masuk',
-              view: 'emails/OrderCreated',
-              viewData: dataPesanan
-            })
-          });
+          email.createdPesanan(dataPesanan)
+          // fetch('/send-email', {
+          //   method: 'POST',
+          //   headers: {
+          //     'Content-Type': 'application/json'
+          //   },
+          //   body: JSON.stringify({
+          //     to: 'jackkolor69@gmail.com',
+          //     subject: 'Pesanan Baru Masuk',
+          //     view: 'emails/OrderCreated',
+          //     viewData: dataPesanan
+          //   })
+          // });
           alert('Pesanan berhasil dibuat!');
           this.modalOpen = false;
           this.form = {

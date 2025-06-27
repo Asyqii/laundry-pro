@@ -39,3 +39,6 @@ $routes->post('/send-email', 'BrevoMain::send');
 $routes->get('/imagez', 'Images::index'); 
 $routes->get('checkout', 'Checkout::index'); 
 $routes->post('checkout/token', 'Checkout::token');
+$routes->set404Override(function () {
+  return view('errors/custom_404');
+});

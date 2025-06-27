@@ -53,7 +53,7 @@
               <td class="p-4" x-text="item.name"></td>
               <td class="p-4" x-text="item.email"></td>
               <td class="p-4" x-text="item.telepon"></td>
-              <td class="p-4" x-text="item.total_pesanan ?? '-' "></td>
+              <td class="p-4" x-text="item.total_pesanan ?? 0 "></td>
               <td class="p-4" x-text="formatTanggal(item.createdAt)"></td>
               <td class="p-4 flex gap-2">
                 <button @click="editPelanggan(item)" class="text-blue-600 hover:text-blue-800 p-2 rounded transition"

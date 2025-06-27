@@ -2,7 +2,7 @@
 <?= $this->section('title') ?>Pesanan & Transaksi<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div x-data="pesananList()" class="space-y-6">
+<div x-data="pesananList()" class="space-y-6" x-init="init()">
 
   <!-- Filter Tabs / Select -->
   <div class="w-full">
@@ -102,59 +102,12 @@
               <td class="p-4" x-text="row.tgl_bayar ? formatTanggal(row.tgl_bayar) : '-'"></td>
               <td class="p-4" x-text="formatTanggal(row.created_at)"></td>
               <td class="p-4">
-                <div x-data="{ isOpen: false, openedWithKeyboard: false }" class="relative w-fit"
-                  x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false">
-
-                  <!-- Toggle Button -->
-                  <button type="button" x-on:click="isOpen = !isOpen"
-                    x-bind:class="isOpen || openedWithKeyboard ? 'text-on-surface-strong dark:text-on-surface-dark-strong' : 'text-on-surface dark:text-on-surface-dark'"
-                    class="inline-flex items-center gap-2 whitespace-nowrap rounded-radius border border-outline bg-surface-alt px-4 py-1.5 text-sm font-medium tracking-wide transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-outline-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:focus-visible:outline-outline-dark-strong"
-                    aria-haspopup="true" x-on:keydown.space.prevent="openedWithKeyboard = true"
-                    x-on:keydown.enter.prevent="openedWithKeyboard = true"
-                    x-on:keydown.down.prevent="openedWithKeyboard = true"
-                    x-bind:aria-expanded="isOpen || openedWithKeyboard">
-                    Aksi
-                    <svg aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                      stroke-width="2" stroke="currentColor" class="size-4">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-
-                  <!-- Dropdown Menu -->
-                  <div x-cloak x-show="isOpen || openedWithKeyboard" x-transition x-trap="openedWithKeyboard"
-                    x-on:click.outside="isOpen = false, openedWithKeyboard = false"
-                    x-on:keydown.down.prevent="$focus.wrap().next()" x-on:keydown.up.prevent="$focus.wrap().previous()"
-                    class="absolute top-11 left-0 z-20 flex w-fit min-w-40 flex-col overflow-hidden rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt shadow-lg"
-                    role="menu">
-
-                    <button @click="alert('Detail: ' + row.nama)"
-                      class="text-left px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-on-surface-strong focus-visible:bg-primary/20 focus-visible:text-on-surface-strong dark:text-on-surface-dark dark:hover:bg-primary-dark/10 dark:hover:text-on-surface-dark-strong"
-                      role="menuitem">
-                      <i class="fas fa-sync-alt fa-sm mr-2"></i> Detail
-                    </button>
-
-                    <button @click="alert('Update Status: ' + row.nama)"
-                      class="text-left px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-on-surface-strong focus-visible:bg-primary/20 focus-visible:text-on-surface-strong dark:text-on-surface-dark dark:hover:bg-primary-dark/10 dark:hover:text-on-surface-dark-strong"
-                      role="menuitem">
-                      <i class="fas fa-sync-alt fa-sm mr-2"></i> Update Status
-                    </button>
-
-                    <button @click="alert('Edit: ' + row.nama)"
-                      class="text-left px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-on-surface-strong focus-visible:bg-primary/20 focus-visible:text-on-surface-strong dark:text-on-surface-dark dark:hover:bg-primary-dark/10 dark:hover:text-on-surface-dark-strong"
-                      role="menuitem">
-                      <i class="fas fa-pen fa-sm mr-2"></i> Edit
-                    </button>
-
-                    <button @click="hapus(row.id)"
-                      class="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 focus-visible:bg-red-200 dark:text-red-400 dark:hover:bg-red-900/20 dark:focus-visible:bg-red-900/30"
-                      role="menuitem">
-                      <i class="fas fa-trash-alt fa-sm mr-2"></i> Delete
-                    </button>
-
-                  </div>
-                </div>
+                <button @click="showUpdateModal(row)"
+                  class="px-3 py-1.5 text-sm rounded bg-primary text-white hover:bg-primary/90 flex items-center gap-2">
+                  <i class="fas fa-edit fa-sm"></i>
+                  Update
+                </button>
               </td>
-
             </tr>
           </template>
         </tbody>
@@ -167,6 +120,127 @@
         <p class="text-sm">Tidak ada pesanan untuk kategori ini.</p>
       </div>
     </template>
+  </div>
+
+  <!-- Modal Update Status -->
+  <div x-show="showStatusModal" x-cloak x-transition.opacity
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div
+      class="bg-surface dark:bg-surface-dark p-6 rounded-radius w-full max-w-2xl border border-outline dark:border-outline-dark">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-on-surface dark:text-on-surface-dark">Detail & Update Pesanan</h2>
+        <button @click="showStatusModal = false" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+      </div>
+
+      <template x-if="selectedOrder">
+        <div class="space-y-6">
+          <!-- Detail Pesanan -->
+          <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+            <h3 class="font-semibold mb-3 text-on-surface dark:text-on-surface-dark">Detail Pesanan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Nama:</span>
+                <span class="ml-2" x-text="selectedOrder.nama"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Layanan:</span>
+                <span class="ml-2" x-text="selectedOrder.layanan"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Kategori:</span>
+                <span class="ml-2" x-text="selectedOrder.kategori"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Jumlah:</span>
+                <span class="ml-2" x-text="selectedOrder.jumlah"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Total:</span>
+                <span class="ml-2" x-text="formatRupiah(selectedOrder.total)"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Tipe:</span>
+                <span class="ml-2" x-text="selectedOrder.tipe"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Metode Bayar:</span>
+                <span class="ml-2" x-text="selectedOrder.metode_bayar"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Status Bayar:</span>
+                <span class="ml-2" x-text="selectedOrder.status_bayar"></span>
+              </div>
+              <div>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Tanggal Masuk:</span>
+                <span class="ml-2" x-text="formatTanggal(selectedOrder.created_at)"></span>
+              </div>
+              <template x-if="selectedOrder.tipe === 'jemput'">
+                <div class="md:col-span-2">
+                  <span class="font-medium text-gray-600 dark:text-gray-400">Alamat Penjemputan:</span>
+                  <span class="ml-2" x-text="selectedOrder.alamat"></span>
+                </div>
+              </template>
+              <template x-if="selectedOrder.catatan">
+                <div class="md:col-span-2">
+                  <span class="font-medium text-gray-600 dark:text-gray-400">Catatan:</span>
+                  <span class="ml-2" x-text="selectedOrder.catatan"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Form Update -->
+          <div class="border-t pt-4">
+            <h3 class="font-semibold mb-3 text-on-surface dark:text-on-surface-dark">Update Pesanan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm mb-2">Status Pesanan:</label>
+                <select x-model="newStatus"
+                  class="w-full border border-outline rounded p-2 dark:bg-surface-dark dark:border-outline-dark dark:text-on-surface-dark">
+                  <option value="">Pilih status...</option>
+                  <option value="Dijemput">Dijemput</option>
+                  <option value="Diterima">Diterima</option>
+                  <option value="Dicuci">Dicuci</option>
+                  <option value="Dikeringkan">Dikeringkan</option>
+                  <option value="Disetrika">Disetrika</option>
+                  <option value="Dilipat">Dilipat</option>
+                  <option value="Diantar">Diantar</option>
+                  <option value="Selesai">Selesai</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm mb-2">Status Pembayaran:</label>
+                <select x-model="newStatusBayar"
+                  class="w-full border border-outline rounded p-2 dark:bg-surface-dark dark:border-outline-dark dark:text-on-surface-dark">
+                  <option value="">Pilih status...</option>
+                  <option value="Belum Bayar">Belum Bayar</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Lunas">Lunas</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-between items-center pt-4 border-t">
+            <button @click="hapus(selectedOrder.id)"
+              class="px-4 py-2 text-sm rounded bg-red-500 text-white hover:bg-red-600 flex items-center gap-2">
+              <i class="fas fa-trash fa-sm"></i>
+              Hapus Pesanan
+            </button>
+            <div class="flex gap-2">
+              <button @click="showStatusModal = false"
+                class="px-4 py-2 text-sm rounded bg-gray-300 dark:bg-gray-700">Batal</button>
+              <button @click="confirmUpdateOrder()" :disabled="!newStatus && !newStatusBayar"
+                class="px-4 py-2 text-sm rounded bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                <i class="fas fa-save fa-sm"></i>
+                Simpan Perubahan
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </div>
 
@@ -222,40 +296,123 @@ function pesananList() {
         icon: 'fas fa-check-circle'
       }
     ],
-    pesanan: [{
-        id: 1,
-        nama: 'Andi',
-        layanan: 'Cuci Setrika',
-        total: 15000,
-        status: 'Dicuci',
-        status_bayar: 'Belum Bayar',
-        metode_bayar: 'QRIS',
-        tgl_bayar: '',
-        created_at: '2025-06-23'
-      },
-      {
-        id: 2,
-        nama: 'Budi',
-        layanan: 'Setrika Saja',
-        total: 8000,
-        status: 'Diterima',
-        status_bayar: 'Lunas',
-        metode_bayar: 'Cash',
-        tgl_bayar: '2025-06-22',
-        created_at: '2025-06-22'
-      },
-      {
-        id: 3,
-        nama: 'Citra',
-        layanan: 'Full Service',
-        total: 25000,
-        status: 'Dijemput',
-        status_bayar: 'Pending',
-        metode_bayar: 'Transfer',
-        tgl_bayar: '',
-        created_at: '2025-06-22'
-      },
-    ],
+    pesanan: [],
+    loading: true,
+    showStatusModal: false,
+    selectedOrder: null,
+    newStatus: '',
+    newStatusBayar: '',
+
+    async fetchPesanan() {
+      try {
+        this.loading = true;
+        const snapshot = await firebase.firestore()
+          .collection('orders')
+          .orderBy('created_at', 'desc')
+          .get();
+
+        this.pesanan = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        alert('Gagal memuat data pesanan: ' + error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async hapus(id) {
+      if (!confirm('Yakin ingin menghapus pesanan ini?')) {
+        return;
+      }
+
+      try {
+        await firebase.firestore().collection('orders').doc(id).delete();
+        this.pesanan = this.pesanan.filter(p => p.id !== id);
+        alert('Pesanan berhasil dihapus!');
+      } catch (error) {
+        console.error('Error deleting order:', error);
+        alert('Gagal menghapus pesanan: ' + error.message);
+      }
+    },
+
+    async updateStatus(id, newStatus) {
+      try {
+        await firebase.firestore().collection('orders').doc(id).update({
+          status: newStatus,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Update local data
+        const index = this.pesanan.findIndex(p => p.id === id);
+        if (index !== -1) {
+          this.pesanan[index].status = newStatus;
+        }
+
+        alert('Status berhasil diupdate!');
+      } catch (error) {
+        console.error('Error updating status:', error);
+        alert('Gagal update status: ' + error.message);
+      }
+    },
+
+    init() {
+      this.fetchPesanan();
+    },
+
+    showUpdateModal(order) {
+      this.selectedOrder = order;
+      this.newStatus = '';
+      this.newStatusBayar = '';
+      this.showStatusModal = true;
+    },
+
+    async confirmUpdateOrder() {
+      if (!this.newStatus && !this.newStatusBayar) {
+        alert('Pilih minimal satu status untuk diupdate!');
+        return;
+      }
+
+      try {
+        const updateData = {};
+
+        if (this.newStatus) {
+          updateData.status = this.newStatus;
+        }
+
+        if (this.newStatusBayar) {
+          updateData.status_bayar = this.newStatusBayar;
+          if (this.newStatusBayar === 'Lunas') {
+            updateData.tgl_bayar = new Date().toISOString();
+          }
+        }
+
+        updateData.updated_at = firebase.firestore.FieldValue.serverTimestamp();
+
+        await firebase.firestore().collection('orders').doc(this.selectedOrder.id).update(updateData);
+
+        // Update local data
+        const index = this.pesanan.findIndex(p => p.id === this.selectedOrder.id);
+        if (index !== -1) {
+          if (this.newStatus) this.pesanan[index].status = this.newStatus;
+          if (this.newStatusBayar) this.pesanan[index].status_bayar = this.newStatusBayar;
+          if (this.newStatusBayar === 'Lunas') this.pesanan[index].tgl_bayar = new Date().toISOString();
+        }
+
+        this.showStatusModal = false;
+        this.selectedOrder = null;
+        this.newStatus = '';
+        this.newStatusBayar = '';
+
+        alert('Pesanan berhasil diupdate!');
+      } catch (error) {
+        console.error('Error updating order:', error);
+        alert('Gagal mengupdate pesanan: ' + error.message);
+      }
+    },
+
     get filteredPesanan() {
       let data = this.pesanan;
       if (this.selectedTab !== 'Semua') {
@@ -309,9 +466,6 @@ function pesananList() {
         'Belum Bayar': 'bg-red-500 dark:bg-red-700',
         'Pending': 'bg-yellow-400 dark:bg-yellow-700',
       } [status] || 'bg-gray-400 dark:bg-gray-700';
-    },
-    hapus(id) {
-      this.pesanan = this.pesanan.filter(p => p.id !== id);
     },
     exportCSV() {
       const rows = this.pesanan.map(p => ({

@@ -6,31 +6,31 @@ Pro Laundry adalah aplikasi web modern untuk memudahkan proses pemesanan, pengel
 
 ### Untuk Pelanggan
 
-- 🔹 **Registrasi & Login**
-- 🔹 **Melakukan Pemesanan**: Pilih jenis layanan, input detail laundry, pilih antar/jemput, dan metode pembayaran (Cash/Online)
-- 🔹 **Melihat Estimasi Biaya & Waktu**
-- 🔹 **Menerima Bukti Transaksi** (via email)
-- 🔹 **Cek Status Laundry** secara real-time
-- 🔹 **Menerima Notifikasi** status pesanan
-- 🔹 **Melakukan Penerimaan** laundry
+- **Registrasi & Login**
+- **Melakukan Pemesanan**: Pilih jenis layanan, input detail laundry, pilih antar/jemput, dan metode pembayaran (Cash/Online)
+- **Melihat Estimasi Biaya & Waktu**
+- **Menerima Bukti Transaksi** (via email)
+- **Cek Status Laundry**
+- **Menerima Notifikasi** status pesanan
+- **Melakukan Penerimaan** laundry
 
 ### Untuk Admin
 
-- 🔹 **Login ke Sistem Admin**
-- 🔹 **Pencatatan & Kelola Transaksi Baru**
-- 🔹 **Kelola Daftar Layanan** (tambah/edit/hapus layanan)
-- 🔹 **Cetak/Kirim Bukti Transaksi** ke pelanggan
-- 🔹 **Update Status Laundry** (Dijemput, Diterima, Dicuci, Selesai, dll)
-- 🔹 **Kelola Notifikasi Pelanggan**
-- 🔹 **Verifikasi Pengambilan**
-- 🔹 **Laporan Transaksi** (export CSV/Excel)
-- 🔹 **Kelola Data Pelanggan**
+- **Login ke Sistem Admin**
+- **Pencatatan & Kelola Transaksi Baru**
+- **Kelola Daftar Layanan** (tambah/edit/hapus layanan)
+- **Cetak/Kirim Bukti Transaksi** ke pelanggan
+- **Update Status Laundry** (Dijemput, Diterima, Dicuci, Selesai, dll)
+- **Kelola Notifikasi Pelanggan**
+- **Verifikasi Pengambilan**
+- **Laporan Transaksi** (export CSV/Excel)
+- **Kelola Data Pelanggan**
 
 ## Teknologi yang Digunakan
 
 - **Frontend**: Alpine.js, Tailwind CSS, HTML5
 - **Backend**: CodeIgniter 4 (PHP)
-- **Database**: Firebase Firestore (Realtime)
+- **Database**: Firebase Firestore 
 - **Email**: SMTP (Brevo/Sendinblue)
 - **Pembayaran Online**: Midtrans Snap
 
